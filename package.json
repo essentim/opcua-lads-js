@@ -1,0 +1,22 @@
+{
+  "name": "opcu-lads-js",
+  "version": "1.0.0",
+  "description": "opcua-lads-js is a library to implement LADS device service in TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/essentim/opcua-lads-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/essentim/opcua-lads-js/issues"
+  },
+  "homepage": "https://github.com/essentim/opcua-lads-js#readme",
+  "dependencies": {
+    "node-opcua-nodeset-machinery": "^2.78.0"
+  }
+}
