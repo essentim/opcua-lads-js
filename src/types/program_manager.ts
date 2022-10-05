@@ -1,3 +1,3 @@
-interface ProgramManager{
+export interface ProgramManager{
 
 }

@@ -1,3 +1,5 @@
+import {FunctionalUnit} from "./functional_unit";
+
 export interface StaticDeviceData {
     name: string;
     deviceClass?: string;
@@ -12,6 +14,7 @@ export interface StaticDeviceData {
     model: string;
     serialNumber: string;
     softwareRevision: string;
-    components?: [];
-    functionalUnitSet: FunctionalUnit[]; // can beg generated
+
+    revisionCounter?: number;
+    deviceRevision?: string;
 }
