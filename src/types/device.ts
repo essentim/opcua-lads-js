@@ -1,5 +1,6 @@
 import { UALADSDeviceStateMachine } from "node-opcua-nodeset-spectaris-de-lads";
 import { ILADSFunctionalUnit } from "./functionalunit";
+import {LockingType} from "./locking";
 
 /**
  * @see UATask
@@ -136,7 +137,7 @@ export interface ILADSDeviceIdentification
    * due to the modular and configurable nature of the
    * machine.
    */
-  hardwareRevision?: string;
+  hardwareRevision: string;
   /**
    * location
    * To be used by end users to store the location of
@@ -195,13 +196,13 @@ export interface ILADSDeviceIdentification
 /**
  * @see UALADSComponent_Base
  */
-interface ILadsComponent {
+export interface ILADSComponent {
   // from UALADSComponent_Base
   /**
    * componentSet
    * Set of sub-components.
    */
-  components?: ILadsComponent[];
+  components?: ILADSComponent[];
   /**
    * deviceHealth
    * Indicates the health status of a device as
@@ -220,7 +221,7 @@ interface ILadsComponent {
   tasks?: IUATask[];
 }
 
-export interface ILADSDevice extends ILadsComponent {
+export interface ILADSDevice extends ILADSComponent {
   // from UAComponent_Base
   // from UADevice_Base
 
@@ -265,19 +266,14 @@ export interface ILADSDevice extends ILadsComponent {
    * Contains functional units of this device.
    */
   functionalUnits: ILADSFunctionalUnit[];
-  /**
-   * hardwareRevision
-   * Revision level of the hardware of the device
-   */
-  hardwareRevision: string;
   identification: ILADSDeviceIdentification;
   /**
    * lock
    * Used to lock the topology element.
    */
-  lock: LockingType;
+  lock?: LockingType;
 
   operational?: IDeviceOperational;
-  stateMachine: UALADSDeviceStateMachine;
+  stateMachine?: UALADSDeviceStateMachine;
   supplySet: IUASupply[];
 }

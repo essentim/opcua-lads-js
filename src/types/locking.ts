@@ -1,4 +1,4 @@
-type LockingType = {
+export type LockingType = {
   defaultInstanceBrowseName: string;
   locked: boolean;
   lockingClient: string;
