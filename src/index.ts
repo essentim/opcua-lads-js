@@ -10,8 +10,9 @@ const opcuaServer = new OPCUAServer({
     nodesets.standard,
     nodesets.di,
     nodesets.machinery,
+    path.join(__dirname, '../nodesets', 'Opc.Ua.AMB.NodeSet2.xml'),
     // FIXME: add required nodesets in ladsplugin
-    path.join(__dirname, './nodesets', 'lads.xml')
+    path.join(__dirname, '../nodesets', 'lads.xml')
   ],
   port: 4841,
   resourcePath: '/LADSServer',
@@ -23,10 +24,17 @@ const opcuaServer = new OPCUAServer({
     buildDate: new Date()
   }
 })
-const LadsServer = new LadsOPCUAServerPlugin(opcuaServer);
-
 async function run() {
   try {
+    // Init server
+    await opcuaServer.initialize();
+    const LadsServer = new LadsOPCUAServerPlugin(opcuaServer);
+
+    // Start server
+    await opcuaServer.start();
+    console.log(`Server started on ${opcuaServer.getEndpointUrl()}`);
+
+    // creater device to publish
     const createdDevice = new LADSDevice("SP1JK3900001", {
       assetId: "MYStockNumebr1",
       componentName: "Sensor1",
@@ -55,7 +63,7 @@ async function run() {
 
 
     // usecase connect
-    const loadedDevice: LADSDevice = await LadsServer.loadDevice("SP1JK3900001");
+    // const loadedDevice: LADSDevice = await LadsServer.loadDevice("SP1JK3900001");
   } catch (e: unknown) {
     if (e instanceof Error) {
       console.error(e.message);
