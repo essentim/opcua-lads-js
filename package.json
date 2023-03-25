@@ -18,6 +18,6 @@
   "homepage": "https://github.com/essentim/opcua-lads-js#readme",
   "dependencies": {
     "node-opcua-nodeset-machinery": "^2.78.0",
-    "node-opcua-nodeset-spectaris-de-lads": "./packages/node-opcua-nodeset-spectaris-de-lads"
+    "node-opcua-nodeset-lads": "./packages/node-opcua-nodeset-lads"
   }
 }
