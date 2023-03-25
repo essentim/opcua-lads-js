@@ -1,10 +1,8 @@
-import {BaseNode, INamespace, makeBrowsePath, OPCUAServer, UAObjectType} from "node-opcua";
-import {ILADSDevice} from "../types/device";
-import { UALADSDevice } from "../../packages/node-opcua-nodeset-spectaris-de-lads/dist/index"
+import {BaseNode, DataType, INamespace, OPCUAServer, UAObject, UAObjectType, UAVariable} from "node-opcua";
+import {ILADSDevice, ILADSDeviceIdentification} from "../types/device";
 import assert from "assert";
-import {AddressSpace} from "node-opcua-address-space/dist/source/address_space_ts";
-import {Namespace} from "node-opcua-address-space/source/namespace";
 import {UARootFolder} from "node-opcua-address-space/source/ua_root_folder";
+import {LADSDevice} from "./device";
 
 export class LadsOPCUAServerPlugin {
   private opcua: OPCUAServer;
@@ -18,6 +16,8 @@ export class LadsOPCUAServerPlugin {
   private typeFunctionalUnit: UAObjectType;
   private typeAnalogSensorFunction: UAObjectType;
   private deviceSet: BaseNode;
+
+  private nodeRefs = new Map<ILADSDevice,UAObject>();
 
   constructor(opcuaServer: OPCUAServer) {
     this.opcua = opcuaServer;
@@ -36,7 +36,7 @@ export class LadsOPCUAServerPlugin {
     // read root folder node id
     this.rootFolder = addressSpace.rootFolder;
     assert(this.rootFolder, 'OPCUA rootFolder not found');
-    const deviceSetNode = this.nsDI.findNode("i=5001");
+    const deviceSetNode = this.rootFolder.objects.getFolderElementByName("DeviceSet",this.nsDI.index);
     assert(deviceSetNode, 'OPCUA DeviceSet Node not found');
     this.deviceSet = deviceSetNode;
     // load required type node ids
@@ -51,22 +51,69 @@ export class LadsOPCUAServerPlugin {
     return type;
   }
 
-  addDevice(device: ILADSDevice) {
-    console.log('adding device');
-    const deviceNode = this.createDeviceNode(device)
+  createDevice(serial: string, deviceProps: ILADSDeviceIdentification): LADSDevice {
+    console.log(`adding device ${serial}`);
+    // create device node with all its properties
+    const deviceNode = this.createNodesDevice(serial, deviceProps);
+
+    // read back created opc-nodes and create a lads-device object
+    return new LADSDevice(deviceNode);
   }
 
   loadDevice(serial: string) : Promise<ILADSDevice> {
 
     throw new Error(`device not fould with serial: ${serial}`);
   }
-  private createDeviceNode(ladsDevice: ILADSDevice) {
 
-    this.typeDevice.instantiate({
-      // organizedBy: this.rootFolder.objects.deviceSet,
+  private createNodesDevice(browseName: string, deviceProps: ILADSDeviceIdentification) : UAObject {
+
+    // instanciate device node
+    const deviceNode = this.typeDevice.instantiate({
       componentOf: this.deviceSet,
-      // browseName: deviceId,
-      browseName: ladsDevice.identification.serialNumber
+      browseName: browseName
     });
+
+    // Set DI Variables
+    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'AssetId', deviceProps.assetId);
+    this.setVariableValueByBrowsePath<DataType.LocalizedText>(deviceNode, 'Model', deviceProps.model);
+    this.setVariableValueByBrowsePath<DataType.LocalizedText>(deviceNode, 'Identification/Model', deviceProps.model);
+    this.setVariableValueByBrowsePath<DataType.Int32>(deviceNode, 'RevisionCounter', 12);
+
+    // Set Machinery Variables
+    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'Identification/AssetId', deviceProps.assetId);
+    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'Identification/Location', deviceProps.location);
+
+
+    // Set LADS variables
+    /*
+    assetId: "MYStockNumber1",
+      componentName: "Sensor1",
+      location: "here",
+      manufacturerUri: new URL("https://essentim.com"),
+      model: "sphere",
+      productInstanceUri: "test",
+      deviceRevision: "1", // FIXME: deviceRevision === hardwareRevision?!?
+      hardwareRevision: "1",
+      softwareRevision: "1",
+      manufacturer: "We",
+      serialNumber: "SP1JK3900001",
+
+     */
+    return deviceNode;
+  }
+
+  private getChildByBrowsePath(deviceNode: UAObject, browseName: string) {
+    let traversedNode: BaseNode | null = deviceNode;
+    for (const subPath of browseName.split('/')) {
+      if (!traversedNode) throw new Error('node not found');
+      traversedNode = traversedNode.getChildByName(subPath);
+    }
+    return traversedNode;
+  }
+
+  private setVariableValueByBrowsePath<T>(deviceNode: UAObject, browsePath: string, value: any) {
+    const variableNode = this.getChildByBrowsePath(deviceNode, browsePath) as UAVariable;
+    if (!variableNode) throw new Error(`could not find variable ${browsePath}`);
+    variableNode.setValueFromSource({value, dataType: variableNode.getBasicDataType() });
   }
 }

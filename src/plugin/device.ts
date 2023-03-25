@@ -11,9 +11,23 @@ import {
 
 import { ILADSFunctionalUnit } from "../types/functionalunit";
 import {LockingType} from "../types/locking";
+import {BaseNode, UAObject, UAVariable} from "node-opcua";
+import {MappedUANode} from "./MappedNode";
 
-export class LADSDevice implements ILADSDevice {
-  identification: ILADSDeviceIdentification;
+export class LADSDevice extends MappedUANode implements ILADSDevice {
+  identification: ILADSDeviceIdentification = {
+    assetId: "",
+    componentName: "",
+    location: "",
+    manufacturerUri: new URL("https://foo.bar"),
+    model: "",
+    productInstanceUri: "",
+    deviceRevision: "",
+    hardwareRevision: "",
+    softwareRevision: "",
+    manufacturer: "",
+    serialNumber: "",
+  };
 
   // presentation
   deviceTypeImage?: any[] | undefined;
@@ -45,10 +59,14 @@ export class LADSDevice implements ILADSDevice {
   components?: ILADSComponent[] = [];
   functionalUnits: ILADSFunctionalUnit[] = [];
 
-  constructor(serial: string, identification: ILADSDeviceIdentification) {
-    this.identification = {
-      ...identification,
-      serialNumber: serial,
-    };
+  constructor(deviceNode: UAObject) {
+    super(deviceNode);
+
+    this.loadPropertiesFromNode(deviceNode);
+  }
+
+  private loadPropertiesFromNode(deviceNode: UAObject): void {
+    const revisionCounterNode = this.getChildByBrowsePath('RevisionCounter') as UAVariable;
+    this.revisionCounter = revisionCounterNode.readValue().value.value;
   }
 }
