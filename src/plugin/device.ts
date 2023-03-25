@@ -14,20 +14,13 @@ import {DataType, UAObject, UInt32} from "node-opcua";
 import {MappedUANode} from "./MappedNode";
 import {EnumDeviceHealth} from "node-opcua-nodeset-di";
 
+export interface EditableLadsDeviceIdentification extends ILADSDeviceIdentification {
+  setAssetId(assetId: string): void;
+  setComponentName(componentName: string): void;
+}
+
 export class LADSDevice extends MappedUANode implements ILADSDevice {
-  identification: ILADSDeviceIdentification = {
-    assetId: "",
-    componentName: "",
-    location: "",
-    manufacturerUri: new URL("https://foo.bar"),
-    model: "",
-    productInstanceUri: "",
-    deviceRevision: "",
-    hardwareRevision: "",
-    softwareRevision: "",
-    manufacturer: "",
-    serialNumber: "",
-  };
+  identification: EditableLadsDeviceIdentification;
 
   // presentation
   deviceTypeImage?: any[] | undefined;
@@ -61,17 +54,35 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
 
   constructor(deviceNode: UAObject, props: ILADSDeviceIdentification) {
     super(deviceNode);
-
+    this.identification = {
+      ...props,
+      setAssetId: this.setAssetId.bind(this),
+      setComponentName: this.setComponentName.bind(this)
+    };
     // set passed properties as initial values if passed
     if (props) { this.setPropertiesFromObject(props); }
     // opc should be complete, trigger a full readout
     this.loadPropertiesFromServer();
   }
 
-  public setAssetId(assetId: string) {
+  /**
+   * handle property updates
+   * @param assetId
+   * @private
+   */
+
+  private setAssetId(assetId: string) {
     this.setVariableValueByBrowsePath<DataType.String>('AssetId', assetId);
     this.setVariableValueByBrowsePath<DataType.String>('Identification/AssetId', assetId);
-    this.identification.assetId = assetId;
+    // read back from node
+    this.identification.assetId = this.readVariableValueByBrowsePath<string>('Identification/AssetId');
+  }
+
+  private setComponentName(componentName: string) {
+    this.setVariableValueByBrowsePath<DataType.String>('ComponentName', componentName);
+    this.setVariableValueByBrowsePath<DataType.String>('Identification/ComponentName', componentName);
+    // read back from node
+    this.identification.componentName = this.readVariableValueByBrowsePath<string>('Identification/ComponentName');
   }
 
   loadPropertiesFromServer(): void {

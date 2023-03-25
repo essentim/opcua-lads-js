@@ -2,6 +2,7 @@ import { NodeId } from "node-opcua-nodeid";
 import { UALADSDeviceStateMachine } from "node-opcua-nodeset-spectaris-de-lads";
 import { ILADSFunctionalUnit } from "./functionalunit";
 import { LockingType } from "./locking";
+import {EditableLadsDeviceIdentification} from "../plugin/device";
 
 /**
  * @see UATask
@@ -290,7 +291,7 @@ export interface ILADSDevice extends ILADSComponent {
    * Contains functional units of this device.
    */
   functionalUnits: ILADSFunctionalUnit[];
-  identification: ILADSDeviceIdentification;
+  identification: EditableLadsDeviceIdentification;
   /**
    * lock
    * Used to lock the topology element.
@@ -300,6 +301,4 @@ export interface ILADSDevice extends ILADSComponent {
   operational?: IDeviceOperational;
   stateMachine?: UALADSDeviceStateMachine;
   supplySet: IUASupply[];
-
-  setAssetId(assetId: string): void;
 }

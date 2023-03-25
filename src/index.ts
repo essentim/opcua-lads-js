@@ -46,29 +46,29 @@ async function run() {
     // Start server
     await opcuaServer.start();
     console.log(`Server started on ${opcuaServer.getEndpointUrl()}`);
-
-    const mySerialNumber: string = await askQuestion("Enter serial number: ");
+    const mySerialNumber: string = "SG1JK3910003";
+    //const mySerialNumber: string = await askQuestion("Enter serial number: ");
 
     const myDevice: ILADSDevice = LadsServer.createDevice(mySerialNumber, {
-      assetId: "",
-      componentName: "Sensor1",
-      location: "here",
-      manufacturerUri: new URL("https://essentim.com"),
-      model: "sphere",
-      productInstanceUri: "test",
-      deviceRevision: "1", // FIXME: deviceRevision === hardwareRevision?!?
-      hardwareRevision: "1",
-      softwareRevision: "1",
-      manufacturer: "We",
       serialNumber: mySerialNumber,
+      componentName: "Sphere A1",
+      assetId: "ABCD",
+      model: "sphere",
+      productInstanceUri: "http://essentim.com/devices/shpere/SG1JK3910003",
+      manufacturer: "essentim GmbH",
+      manufacturerUri: new URL("http://essentim.com"),
+      deviceRevision: "1",
+      hardwareRevision: "1.5.0",
+      softwareRevision: "5.1.0",
+      location: "unknown"
     });
 
     // update property, should be written to uanode
-
-
-    const myAssetId: string = await askQuestion("Set AssetId: ");
-    myDevice.setAssetId(myAssetId);
-
+    // const myAssetId: string = await askQuestion("Set AssetId: ");
+    myDevice.identification.setAssetId("ABCD-2");
+    myDevice.identification.setComponentName("Sphere A1-2");
+    console.log(`assetId: ${myDevice.identification.assetId}`);
+    console.log(`cName:   ${myDevice.identification.componentName}`);
     // myDevice.identification.setComponentName(123);
 
     // show created device loaded from uanodes
@@ -86,33 +86,6 @@ async function run() {
     // const func = myUnit.addControlFunction("Door", () => {
     //   console.log('door open requested');
     // })
-/*
-    // creater device to publish
-    const createdDevice = new LADSDevice("SP1JK3900001", {
-      assetId: "MYStockNumber1",
-      componentName: "Sensor1",
-      location: "here",
-      manufacturerUri: new URL("https://essentim.com"),
-      model: "sphere",
-      productInstanceUri: "test",
-      deviceRevision: "1", // FIXME: deviceRevision === hardwareRevision?!?
-      hardwareRevision: "1",
-      softwareRevision: "1",
-      manufacturer: "We",
-      serialNumber: "SP1JK3900001",
-    });
-
-    // const func = createdDevices.addFunction("Temperature", Double)
-    // func.setValue(22.5)
-
-    const mappedDevice = LadsServer.addDevice(createdDevice);
-    // load device from opcua-server
-    // uniquely identify device: manufacturer model serial number
-
-    // should modify node ComponentName
-    mappedDevice.setAssetId('MyUpdatedStockNumber1');
-    mappedDevice.setComponentName('MyUpdatedName');
-*/
 
     // usecase connect
     // const loadedDevice: LADSDevice = await LadsServer.loadDevice("SP1JK3900001");
