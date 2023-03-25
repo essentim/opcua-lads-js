@@ -1,9 +1,21 @@
 import path from "path";
+import readline from "readline";
 
-import { LADSDevice } from "./plugin/device";
 import { OPCUAServer, nodesets } from 'node-opcua';
 import {LadsOPCUAServerPlugin} from "./plugin/lads-plugin";
 import {ILADSDevice} from "./types/device";
+
+function askQuestion(query: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise(resolve => rl.question(query, (ans: string) => {
+    rl.close();
+    resolve(ans);
+  }))
+}
 
 const opcuaServer = new OPCUAServer({
   nodeset_filename: [
@@ -35,9 +47,10 @@ async function run() {
     await opcuaServer.start();
     console.log(`Server started on ${opcuaServer.getEndpointUrl()}`);
 
-    console.log('creating device...');
-    const myDevice: ILADSDevice = LadsServer.createDevice("SP1JK3900001", {
-      assetId: "MYStockNumber1",
+    const mySerialNumber: string = await askQuestion("Enter serial number: ");
+
+    const myDevice: ILADSDevice = LadsServer.createDevice(mySerialNumber, {
+      assetId: "",
       componentName: "Sensor1",
       location: "here",
       manufacturerUri: new URL("https://essentim.com"),
@@ -47,15 +60,20 @@ async function run() {
       hardwareRevision: "1",
       softwareRevision: "1",
       manufacturer: "We",
-      serialNumber: "SP1JK3900001",
+      serialNumber: mySerialNumber,
     });
 
-    // show created device loaded from uanodes
-    console.log(`got device with revisionCounter: ${myDevice.revisionCounter}`);
-
     // update property, should be written to uanode
-    myDevice.identification.assetId = 'MyUpdatedStockNumber1';
+
+
+    const myAssetId: string = await askQuestion("Set AssetId: ");
+    myDevice.setAssetId(myAssetId);
+
     // myDevice.identification.setComponentName(123);
+
+    // show created device loaded from uanodes
+    // console.log(`got device: ${JSON.stringify({ ...myDevice, node: undefined}, null, 2)}`);
+
 
     // add unit
     // const myUnit = myDevice.addUnit("SP1JK3900001-1");

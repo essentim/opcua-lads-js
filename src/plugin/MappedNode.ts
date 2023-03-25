@@ -1,4 +1,11 @@
-import {BaseNode, UAObject} from "node-opcua";
+import {BaseNode, DataType, UAObject, UAVariable} from "node-opcua";
+
+function mapDataTypeUA2TS(basicDataType: DataType, value: any) {
+  switch (basicDataType) {
+    case DataType.LocalizedText: return value.text;
+    default: return value;
+  }
+}
 
 export abstract class MappedUANode {
   node: UAObject;
@@ -14,5 +21,19 @@ export abstract class MappedUANode {
       traversedNode = traversedNode.getChildByName(subPath);
     }
     return traversedNode;
+  }
+
+  protected readVariableValueByBrowsePath<T>(browsePath: string): T {
+    const variableNode = this.getChildByBrowsePath(browsePath) as UAVariable;
+    if (!variableNode) throw new Error(`could not find variable ${browsePath}`);
+
+    return mapDataTypeUA2TS(variableNode.getBasicDataType(), variableNode.readValue().value.value);
+  }
+
+  public setVariableValueByBrowsePath<T>(
+    browsePath: string, value: any) {
+    const variableNode = this.getChildByBrowsePath(browsePath) as UAVariable;
+    if (!variableNode) throw new Error(`could not find variable ${browsePath}`);
+    variableNode.setValueFromSource({value, dataType: variableNode.getBasicDataType() });
   }
 }

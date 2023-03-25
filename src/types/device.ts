@@ -300,4 +300,6 @@ export interface ILADSDevice extends ILADSComponent {
   operational?: IDeviceOperational;
   stateMachine?: UALADSDeviceStateMachine;
   supplySet: IUASupply[];
+
+  setAssetId(assetId: string): void;
 }

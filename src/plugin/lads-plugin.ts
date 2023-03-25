@@ -53,53 +53,19 @@ export class LadsOPCUAServerPlugin {
 
   createDevice(serial: string, deviceProps: ILADSDeviceIdentification): LADSDevice {
     console.log(`adding device ${serial}`);
+
     // create device node with all its properties
-    const deviceNode = this.createNodesDevice(serial, deviceProps);
-
-    // read back created opc-nodes and create a lads-device object
-    return new LADSDevice(deviceNode);
-  }
-
-  loadDevice(serial: string) : Promise<ILADSDevice> {
-
-    throw new Error(`device not fould with serial: ${serial}`);
-  }
-
-  private createNodesDevice(browseName: string, deviceProps: ILADSDeviceIdentification) : UAObject {
-
-    // instanciate device node
     const deviceNode = this.typeDevice.instantiate({
       componentOf: this.deviceSet,
-      browseName: browseName
+      browseName: serial
     });
 
-    // Set DI Variables
-    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'AssetId', deviceProps.assetId);
-    this.setVariableValueByBrowsePath<DataType.LocalizedText>(deviceNode, 'Model', deviceProps.model);
-    this.setVariableValueByBrowsePath<DataType.LocalizedText>(deviceNode, 'Identification/Model', deviceProps.model);
-    this.setVariableValueByBrowsePath<DataType.Int32>(deviceNode, 'RevisionCounter', 12);
+    // decorate node with lads-device
+    const newDevice =  new LADSDevice(deviceNode, deviceProps);
 
-    // Set Machinery Variables
-    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'Identification/AssetId', deviceProps.assetId);
-    this.setVariableValueByBrowsePath<DataType.String>(deviceNode, 'Identification/Location', deviceProps.location);
-
-
-    // Set LADS variables
-    /*
-    assetId: "MYStockNumber1",
-      componentName: "Sensor1",
-      location: "here",
-      manufacturerUri: new URL("https://essentim.com"),
-      model: "sphere",
-      productInstanceUri: "test",
-      deviceRevision: "1", // FIXME: deviceRevision === hardwareRevision?!?
-      hardwareRevision: "1",
-      softwareRevision: "1",
-      manufacturer: "We",
-      serialNumber: "SP1JK3900001",
-
-     */
-    return deviceNode;
+    // load all values from server
+    newDevice.loadPropertiesFromServer();
+    return newDevice;
   }
 
   private getChildByBrowsePath(deviceNode: UAObject, browseName: string) {
@@ -109,11 +75,5 @@ export class LadsOPCUAServerPlugin {
       traversedNode = traversedNode.getChildByName(subPath);
     }
     return traversedNode;
-  }
-
-  private setVariableValueByBrowsePath<T>(deviceNode: UAObject, browsePath: string, value: any) {
-    const variableNode = this.getChildByBrowsePath(deviceNode, browsePath) as UAVariable;
-    if (!variableNode) throw new Error(`could not find variable ${browsePath}`);
-    variableNode.setValueFromSource({value, dataType: variableNode.getBasicDataType() });
   }
 }
