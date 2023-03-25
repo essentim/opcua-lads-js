@@ -1,6 +1,7 @@
+import { NodeId } from "node-opcua-nodeid";
 import { UALADSDeviceStateMachine } from "node-opcua-nodeset-spectaris-de-lads";
 import { ILADSFunctionalUnit } from "./functionalunit";
-import {LockingType} from "./locking";
+import { LockingType } from "./locking";
 
 /**
  * @see UATask
@@ -21,8 +22,31 @@ export enum UAFiniteState {
   "PAUSED",
 }
 
+export interface IDeviceStateMachine {
+  gotoMaintenance?: () => void;
+  gotoOperating?: () => void;
+  gotoShutdown?: () => void;
+  gotoStandby?: () => void;
+  maintenance: number;
+  maintenanceToOperatingTransition: number;
+  maintenanceToShutdownTransition: number;
+  operating: number;
+  operatingToMaintenanceTransition: number;
+  operatingToShutdownTransition: number;
+  operatingToStandbyTransition: number;
+  powerup: number;
+  powerupToOperatingTransition: number;
+  shutdown: number;
+  standby: number;
+  standbyToOperatingTransition: number;
+  currentState: string;
+  lastTransition?: string;
+  availableStates?: NodeId[];
+  availableTransitions?: NodeId[];
+}
+
 export interface IDeviceOperational {
-  currentState: UAFiniteState;
+  currentState: string;
   gotoMaintenance?: () => void;
   gotoOperating?: () => void;
   gotoShutdown?: () => void;
