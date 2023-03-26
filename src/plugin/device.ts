@@ -90,9 +90,9 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
     this.revisionCounter = this.readVariableValueByBrowsePath<UInt32>('RevisionCounter');
     this.identification.assetId = this.readVariableValueByBrowsePath<string>('Identification/AssetId');
     this.identification.componentName = this.readVariableValueByBrowsePath<string>('Identification/ComponentName');
-    this.identification.location = this.readVariableValueByBrowsePath<string>('Identification/Location');
+    // this.identification.location = this.readVariableValueByBrowsePath<string>('OperationalLocation');
     this.identification.manufacturer = this.readVariableValueByBrowsePath<string>('Identification/Manufacturer');
-    this.identification.manufacturerUri = this.readVariableValueByBrowsePath<string>('Identification/ManufacturerUri');
+    // this.identification.manufacturerUri = this.readVariableValueByBrowsePath<string>('Identification/ManufacturerUri');
     this.identification.model = this.readVariableValueByBrowsePath<string>('Identification/Model');
     this.identification.productInstanceUri = this.readVariableValueByBrowsePath<string>('Identification/ProductInstanceUri');
     this.identification.hardwareRevision = this.readVariableValueByBrowsePath<string>('HardwareRevision');
@@ -105,9 +105,10 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
     this.setAssetId(deviceProps.assetId);
 
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/ComponentName', deviceProps.componentName);
-    this.setVariableValueByBrowsePath<DataType.String>('Identification/Location', deviceProps.location);
+    // this.setVariableValueByBrowsePath<DataType.String>('OperationalLocation', deviceProps.location);
+    // this.setVariableValueByBrowsePath<DataType.String>('Identification/OperationalLocation', deviceProps.location);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Manufacturer', deviceProps.manufacturer);
-    this.setVariableValueByBrowsePath<DataType.String>('Identification/ManufacturerUri', deviceProps.manufacturerUri);
+    // this.setVariableValueByBrowsePath<DataType.String>('Identification/ManufacturerUri', deviceProps.manufacturerUri);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Model', deviceProps.model);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Model', deviceProps.model);
     this.setVariableValueByBrowsePath<DataType.String>('Identification/ProductInstanceUri', deviceProps.productInstanceUri);

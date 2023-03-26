@@ -22,6 +22,7 @@ export class LadsOPCUAServerPlugin {
   private typeFunctionalUnit: UAObjectType;
   private typeAnalogSensorFunction: UAObjectType;
   private typeComponent: UAObjectType;
+  private typeComponentSetType: UAObjectType;
 
 
   constructor(opcuaServer: OPCUAServer) {
@@ -53,6 +54,7 @@ export class LadsOPCUAServerPlugin {
     this.typeComponent = this.assertFindObjectType(this.nsLADS,'LADSComponentType');
     this.typeFunctionalUnit = this.assertFindObjectType(this.nsLADS,'FunctionalUnitType');
     this.typeAnalogSensorFunction = this.assertFindObjectType(this.nsLADS,'AnalogSensorFunctionType');
+    this.typeComponentSetType = this.assertFindObjectType(this.nsLADS,'ComponentSetType');
   }
 
   assertFindObjectType(ns: INamespace, name: string) {
@@ -62,13 +64,14 @@ export class LadsOPCUAServerPlugin {
   }
 
   createDevice(serial: string, deviceProps: LADSDeviceType): LADSDevice {
-    console.log(`adding device ${serial}`);
+    console.log(`adding device ${serial}...`);
 
     // create device node with all its properties
     const deviceNode = this.typeDevice.instantiate({
       componentOf: this.deviceSet,
       browseName: serial
     });
+    console.log(`adding device ${serial} -> instantiated...`);
 
     // decorate node with lads-device
     const newDevice =  new LADSDevice(deviceNode, deviceProps);
@@ -82,23 +85,20 @@ export class LadsOPCUAServerPlugin {
     console.log(`adding component ${identifier}`);
 
     // resolve parent nodes
-    const componentSetFolderNode = parent.node.getChildByName("ComponentSet", this.nsLADS.index);
-    if (!componentSetFolderNode) throw new Error('could not find node ComponentSet');
+    // A LADSDevice has also the components node which shall also contain the components
+    let componentsFolderNode = parent.node.getChildByName("Components", this.nsLADS.index);
+    if (!componentsFolderNode) {
+      componentsFolderNode = this.typeComponentSetType.instantiate({
+        componentOf: parent.node,
+        browseName: 'Components'
+      })
+    };
 
     // create component node with all its properties
     const componentNode = this.typeComponent.instantiate({
-      componentOf: componentSetFolderNode,
+      componentOf: componentsFolderNode,
       browseName: identifier
     });
-    // A LADSDevice has also the components node which shall also contain the components
-    const componentsFolderNode = parent.node.getChildByName("Components", this.nsLADS.index);
-    if (componentsFolderNode) {
-      componentNode.addReference({
-        referenceType: "OrganizedBy",
-        nodeId: componentsFolderNode
-      });
-    }
-
 
     // decorate node with lads-device
     const newComponent =  new LADSComponent(componentNode, componentProps);

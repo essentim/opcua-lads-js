@@ -45,7 +45,7 @@ export class LADSComponent extends MappedUANode implements ILADSComponent {
     // this.identification.componentName = this.readVariableValueByBrowsePath<string>('Identification/ComponentName');
     this.identification.manufacturer = this.readVariableValueByBrowsePath<string>('Identification/Manufacturer');
     // this.identification.manufacturerUri = this.readVariableValueByBrowsePath<string>('Identification/ManufacturerUri');
-    this.identification.model = this.readVariableValueByBrowsePath<string>('Model');
+    // this.identification.model = this.readVariableValueByBrowsePath<string>('Model');
     // this.identification.productInstanceUri = this.readVariableValueByBrowsePath<string>('Identification/ProductInstanceUri');
     // this.identification.hardwareRevision = this.readVariableValueByBrowsePath<string>('HardwareRevision');
     // this.identification.softwareRevision = this.readVariableValueByBrowsePath<string>('SoftwareRevision');
@@ -58,7 +58,7 @@ export class LADSComponent extends MappedUANode implements ILADSComponent {
     //this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/ComponentName', deviceProps.componentName);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Manufacturer', deviceProps.manufacturer);
     // this.setVariableValueByBrowsePath<DataType.String>('Identification/ManufacturerUri', deviceProps.manufacturerUri);
-    this.setVariableValueByBrowsePath<DataType.LocalizedText>('Model', deviceProps.model);
+    // this.setVariableValueByBrowsePath<DataType.LocalizedText>('Model', deviceProps.model);
     // this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Model', deviceProps.model);
     // this.setVariableValueByBrowsePath<DataType.String>('Identification/ProductInstanceUri', deviceProps.productInstanceUri);
     // this.setVariableValueByBrowsePath<DataType.String>('DeviceRevision', deviceProps.deviceRevision);

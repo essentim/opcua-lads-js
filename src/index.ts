@@ -90,10 +90,6 @@ async function run() {
       yearOfConstruction: 2020
     });
 
-
-    /*
-    // FIXME: create node Components and ComponentSet when attaching sub-components
-
     const sensor: ILADSComponent = LadsServer.createComponent(extension,'Sensor', {
       deviceRevision: "1",
       serialNumber: "PT1JK100034-1",
@@ -102,7 +98,6 @@ async function run() {
       productCode:'PT1',
       manufacturer: "sawi"
     });
-   */
 
     // myDevice.identification.setComponentName(123);
 
