@@ -20,9 +20,12 @@ function askQuestion(query: string): Promise<string> {
 const opcuaServer = new OPCUAServer({
   nodeset_filename: [
     // add default node-sets, otherwise they'll be removed
-    nodesets.standard,
-    nodesets.di,
-    nodesets.machinery,
+    //nodesets.standard,
+    path.join(__dirname, '../nodesets', 'Opc.Ua.NodeSet2.xml'),
+    //nodesets.di,
+    path.join(__dirname, '../nodesets', 'Opc.Ua.Di.NodeSet2.xml'),
+    //nodesets.machinery,
+    path.join(__dirname, '../nodesets', 'Opc.Ua.Machinery.NodeSet2.xml'),
     path.join(__dirname, '../nodesets', 'Opc.Ua.AMB.NodeSet2.xml'),
     // FIXME: add required nodesets in ladsplugin
     path.join(__dirname, '../nodesets', 'lads.xml')

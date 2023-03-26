@@ -36,8 +36,12 @@ export class LadsOPCUAServerPlugin {
     this.nsDI = addressSpace.getNamespace('http://opcfoundation.org/UA/DI/');
     this.nsMachinery = addressSpace.getNamespace('http://opcfoundation.org/UA/Machinery/');
     this.nsAMB = addressSpace.getNamespace('http://opcfoundation.org/UA/AMB/');
-    this.nsLADS = addressSpace.getNamespace('http://spectaris.de/LADS/');
+    this.nsLADS = addressSpace.getNamespace('http://opcfoundation.org/UA/LADS/');
 
+    assert(this.nsDI, 'Could not load namespace UA/DI');
+    assert(this.nsMachinery, 'Could not load namespace UA/Machinery');
+    assert(this.nsAMB, 'Could not load namespace UA/AMB');
+    assert(this.nsLADS, 'Could not load namespace UA/LADS');
     // read root folder node id
     this.rootFolder = addressSpace.rootFolder;
     assert(this.rootFolder, 'OPCUA rootFolder not found');
@@ -45,8 +49,8 @@ export class LadsOPCUAServerPlugin {
     assert(deviceSetNode, 'OPCUA DeviceSet Node not found');
     this.deviceSet = deviceSetNode;
     // load required type node ids
-    this.typeDevice = this.assertFindObjectType(this.nsLADS,'LADSDeviceType') ;
-    this.typeComponent = this.assertFindObjectType(this.nsLADS,'LADSComponentType') ;
+    this.typeDevice = this.assertFindObjectType(this.nsLADS,'LADSDeviceType');
+    this.typeComponent = this.assertFindObjectType(this.nsLADS,'LADSComponentType');
     this.typeFunctionalUnit = this.assertFindObjectType(this.nsLADS,'FunctionalUnitType');
     this.typeAnalogSensorFunction = this.assertFindObjectType(this.nsLADS,'AnalogSensorFunctionType');
   }
