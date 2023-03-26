@@ -1,23 +1,28 @@
-import {BaseNode, DataType, INamespace, OPCUAServer, UAObject, UAObjectType, UAVariable} from "node-opcua";
-import {ILADSDevice, ILADSDeviceIdentification} from "../types/device";
+import {BaseNode, INamespace, OPCUAServer, ReferenceTypeIds, UAObject, UAObjectType, UAReferenceType} from "node-opcua";
 import assert from "assert";
 import {UARootFolder} from "node-opcua-address-space/source/ua_root_folder";
 import {LADSDevice} from "./device";
+import {LADSComponentType, LADSDeviceType, ILADSComponent} from "../types";
+import {LADSComponent} from "./component";
 
 export class LadsOPCUAServerPlugin {
   private opcua: OPCUAServer;
+  // used namespaces
   private nsLocal: INamespace;
   private nsDI: INamespace;
   private nsMachinery: INamespace;
   private nsAMB: INamespace;
   private nsLADS: INamespace;
+  // central nodes
   private rootFolder: UARootFolder;
+  private deviceSet: BaseNode;
+
+  // used types
   private typeDevice: UAObjectType;
   private typeFunctionalUnit: UAObjectType;
   private typeAnalogSensorFunction: UAObjectType;
-  private deviceSet: BaseNode;
+  private typeComponent: UAObjectType;
 
-  private nodeRefs = new Map<ILADSDevice,UAObject>();
 
   constructor(opcuaServer: OPCUAServer) {
     this.opcua = opcuaServer;
@@ -41,6 +46,7 @@ export class LadsOPCUAServerPlugin {
     this.deviceSet = deviceSetNode;
     // load required type node ids
     this.typeDevice = this.assertFindObjectType(this.nsLADS,'LADSDeviceType') ;
+    this.typeComponent = this.assertFindObjectType(this.nsLADS,'LADSComponentType') ;
     this.typeFunctionalUnit = this.assertFindObjectType(this.nsLADS,'FunctionalUnitType');
     this.typeAnalogSensorFunction = this.assertFindObjectType(this.nsLADS,'AnalogSensorFunctionType');
   }
@@ -51,7 +57,7 @@ export class LadsOPCUAServerPlugin {
     return type;
   }
 
-  createDevice(serial: string, deviceProps: ILADSDeviceIdentification): LADSDevice {
+  createDevice(serial: string, deviceProps: LADSDeviceType): LADSDevice {
     console.log(`adding device ${serial}`);
 
     // create device node with all its properties
@@ -66,6 +72,36 @@ export class LadsOPCUAServerPlugin {
     // load all values from server
     newDevice.loadPropertiesFromServer();
     return newDevice;
+  }
+
+  createComponent(parent: ILADSComponent, identifier: string, componentProps: LADSComponentType): ILADSComponent {
+    console.log(`adding component ${identifier}`);
+
+    // resolve parent nodes
+    const componentSetFolderNode = parent.node.getChildByName("ComponentSet", this.nsLADS.index);
+    if (!componentSetFolderNode) throw new Error('could not find node ComponentSet');
+
+    // create component node with all its properties
+    const componentNode = this.typeComponent.instantiate({
+      componentOf: componentSetFolderNode,
+      browseName: identifier
+    });
+    // A LADSDevice has also the components node which shall also contain the components
+    const componentsFolderNode = parent.node.getChildByName("Components", this.nsLADS.index);
+    if (componentsFolderNode) {
+      componentNode.addReference({
+        referenceType: "OrganizedBy",
+        nodeId: componentsFolderNode
+      });
+    }
+
+
+    // decorate node with lads-device
+    const newComponent =  new LADSComponent(componentNode, componentProps);
+
+    // load all values from server
+    newComponent.loadPropertiesFromServer();
+    return newComponent;
   }
 
   private getChildByBrowsePath(deviceNode: UAObject, browseName: string) {

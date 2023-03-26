@@ -3,7 +3,7 @@ import readline from "readline";
 
 import { OPCUAServer, nodesets } from 'node-opcua';
 import {LadsOPCUAServerPlugin} from "./plugin/lads-plugin";
-import {ILADSDevice} from "./types/device";
+import {ILADSComponent, ILADSDevice} from "./types";
 
 function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
@@ -56,24 +56,55 @@ async function run() {
       model: "sphere",
       productInstanceUri: "http://essentim.com/devices/shpere/SG1JK3910003",
       manufacturer: "essentim GmbH",
-      manufacturerUri: new URL("http://essentim.com"),
+      manufacturerUri: "http://essentim.com",
       deviceRevision: "1",
       hardwareRevision: "1.5.0",
       softwareRevision: "5.1.0",
-      location: "unknown"
+      location: "unknown",
+      monthOfConstruction: 12,
     });
 
     // update property, should be written to uanode
     // const myAssetId: string = await askQuestion("Set AssetId: ");
     myDevice.identification.setAssetId("ABCD-2");
     myDevice.identification.setComponentName("Sphere A1-2");
-    console.log(`assetId: ${myDevice.identification.assetId}`);
-    console.log(`cName:   ${myDevice.identification.componentName}`);
+
+    console.log(`assetId:       ${myDevice.identification.assetId}`);
+    console.log(`componentName: ${myDevice.identification.componentName}`);
+
+    const extension: ILADSComponent = LadsServer.createComponent(myDevice,'PT1JK100034', {
+      serialNumber: "PT1JK100034",
+      componentName: "PT100Ext",
+      model: "pt100",
+      productCode:'PT1',
+      productInstanceUri: "http://essentim.com/extension/PT1JK100034",
+      manufacturer: "essentim GmbH",
+      manufacturerUri: "http://essentim.com",
+      deviceRevision: "1",
+      hardwareRevision: "1.0.1",
+      softwareRevision: "1.1.0",
+      monthOfConstruction: 11,
+      yearOfConstruction: 2020
+    });
+
+
+    /*
+    // FIXME: create node Components and ComponentSet when attaching sub-components
+
+    const sensor: ILADSComponent = LadsServer.createComponent(extension,'Sensor', {
+      deviceRevision: "1",
+      serialNumber: "PT1JK100034-1",
+      componentName: "PT100 Sensor",
+      model: "pt100i",
+      productCode:'PT1',
+      manufacturer: "sawi"
+    });
+   */
+
     // myDevice.identification.setComponentName(123);
 
     // show created device loaded from uanodes
     // console.log(`got device: ${JSON.stringify({ ...myDevice, node: undefined}, null, 2)}`);
-
 
     // add unit
     // const myUnit = myDevice.addUnit("SP1JK3900001-1");

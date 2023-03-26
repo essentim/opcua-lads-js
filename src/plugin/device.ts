@@ -6,21 +6,22 @@ import {
   IUABaseMaintenanceInformation,
   IUASupply,
   IUATask,
-} from "../types/device";
+  ILADSFunctionalUnit,
+  LADSDeviceType,
+  LockingType,
+} from "../types";
 
-import { ILADSFunctionalUnit } from "../types/functionalunit";
-import {LockingType} from "../types/locking";
 import {DataType, UAObject, UInt32} from "node-opcua";
 import {MappedUANode} from "./MappedNode";
 import {EnumDeviceHealth} from "node-opcua-nodeset-di";
 
-export interface EditableLadsDeviceIdentification extends ILADSDeviceIdentification {
-  setAssetId(assetId: string): void;
-  setComponentName(componentName: string): void;
-}
+type WriteableLADSDevicIdentification = { -readonly [key in keyof ILADSDeviceIdentification]: ILADSDeviceIdentification[key] };
 
 export class LADSDevice extends MappedUANode implements ILADSDevice {
-  identification: EditableLadsDeviceIdentification;
+  // Make identification properties writable for internal functions,
+  // but keep them readonly on the outside via the readonly-flag
+  // on the interface ILADSDeviceIdentification
+  identification: WriteableLADSDevicIdentification;
 
   // presentation
   deviceTypeImage?: any[] | undefined;
@@ -52,7 +53,7 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
   components?: ILADSComponent[] = [];
   functionalUnits: ILADSFunctionalUnit[] = [];
 
-  constructor(deviceNode: UAObject, props: ILADSDeviceIdentification) {
+  constructor(deviceNode: UAObject, props: LADSDeviceType) {
     super(deviceNode);
     this.identification = {
       ...props,
@@ -91,7 +92,7 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
     this.identification.componentName = this.readVariableValueByBrowsePath<string>('Identification/ComponentName');
     this.identification.location = this.readVariableValueByBrowsePath<string>('Identification/Location');
     this.identification.manufacturer = this.readVariableValueByBrowsePath<string>('Identification/Manufacturer');
-    this.identification.manufacturerUri = this.readVariableValueByBrowsePath<URL>('Identification/ManufacturerUri');
+    this.identification.manufacturerUri = this.readVariableValueByBrowsePath<string>('Identification/ManufacturerUri');
     this.identification.model = this.readVariableValueByBrowsePath<string>('Identification/Model');
     this.identification.productInstanceUri = this.readVariableValueByBrowsePath<string>('Identification/ProductInstanceUri');
     this.identification.hardwareRevision = this.readVariableValueByBrowsePath<string>('HardwareRevision');
@@ -99,14 +100,14 @@ export class LADSDevice extends MappedUANode implements ILADSDevice {
     this.identification.serialNumber = this.readVariableValueByBrowsePath<string>('Identification/SerialNumber');
   }
 
-  setPropertiesFromObject(deviceProps: ILADSDeviceIdentification) {
+  setPropertiesFromObject(deviceProps: LADSDeviceType) {
     this.setVariableValueByBrowsePath<DataType.String>('SerialNumber', deviceProps.serialNumber);
     this.setAssetId(deviceProps.assetId);
 
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/ComponentName', deviceProps.componentName);
     this.setVariableValueByBrowsePath<DataType.String>('Identification/Location', deviceProps.location);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Manufacturer', deviceProps.manufacturer);
-    this.setVariableValueByBrowsePath<DataType.String>('Identification/ManufacturerUri', deviceProps.manufacturerUri.toString());
+    this.setVariableValueByBrowsePath<DataType.String>('Identification/ManufacturerUri', deviceProps.manufacturerUri);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Model', deviceProps.model);
     this.setVariableValueByBrowsePath<DataType.LocalizedText>('Identification/Model', deviceProps.model);
     this.setVariableValueByBrowsePath<DataType.String>('Identification/ProductInstanceUri', deviceProps.productInstanceUri);
